@@ -50,6 +50,17 @@ def monthly_expenses():
                     ,(monthly_income, rent, groceries, entertainment, transport, debt, savings_target)
                     )
                 
+                
+                cursor.execute(
+                    """
+                    UPDATE budget_app
+                    SET total_cost = (rent + groceries + entertainment + transport)
+                    WHERE id = 1
+                    """
+                    
+                    )
+                
+                
                 db.commit()
                     
             else:
@@ -60,7 +71,8 @@ def monthly_expenses():
     return render_template("index.html")
         
     
-
+#cursor.execute("DELETE FROM budget_app")
+#db.commit()
 
 
 if __name__ == "__main__":
