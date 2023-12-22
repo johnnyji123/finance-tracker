@@ -9,13 +9,13 @@
   </head>
   <body>
       <h2>Budget app</h2>
-      <form>
-      <input type = "number" placeholder = "income" name = "income" step = ".01"></input>
+      <form action = "{{url_for('monthly_expenses')}}" method = "POST">
+      <input type = "number" placeholder = "income" name = "monthly_income" step = ".01"></input>
       <input type = "number" placeholder = "rent expense" name = "rent" step = ".01"></input>
-      <input type = "number" placeholder = "grocery expense" name = "grocieries" step = ".01"></input>
-      <input type = "number" placeholder = "entertainment_expenses" name = "entertainment" step = ".01"></input
+      <input type = "number" placeholder = "grocery expense" name = "groceries" step = ".01"></input>
+      <input type = "number" placeholder = "entertainment_expenses" name = "entertainment" step = ".01"></input>
       <input type = "number" placeholder = "transport expenses" name = "transport" step = ".01"></input>
-      <input type = "number" placeholder = "debt" name - "debt" step = ".01"> </input>
+      <input type = "number" placeholder = "debt" name = "debt" step = ".01"></input>
       <input type = "number" placeholder = "savings target" name = "savings_target_year"></input>
       <input type = "submit" value = "Submit"></input>
       </form>
