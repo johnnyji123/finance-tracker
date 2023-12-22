@@ -19,6 +19,21 @@
       <input type = "number" placeholder = "savings target" name = "savings_target_year"></input>
       <input type = "submit" value = "Submit"></input>
       </form>
+      <li>
+          {% for row in data %}
+         <ul>
+              {% for key, value in row.items() %}
+                  {{key}}: {{value}}
+              {% endfor %}
+          {% endfor %} 
+          </ul>
+     </li>
+     <form>
+         <input type = "number" placeholder = "add £ savings" name = "savings_target_year" step = ".01"></input>
+         <input type = "number" placeholder = "reduce debt £" name = "debt" step = ".01"></input>
+         <input type = "submit" value = "Submit"></input>
+     
+     </form>
 	<script src="index.js"></script>
   </body>
 </html>
