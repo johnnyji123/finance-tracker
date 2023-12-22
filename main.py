@@ -82,43 +82,6 @@ def monthly_expenses():
     return render_template("index.html", data = income_and_expenses_data)
 
 
-@app.route("/savings_and_debt_repayment", methods = ["GET", "POST"])
-def savings_and_debt_repayment():
-    if request.method == "POST":
-        savings_paid = request.form.get("savings_paid")
-        debt_paid = request.form.get("debt_paid")
-        
-        cursor.execute("""
-                       UPDATE budget_app SET debt_paid = %s, savings_paid = %s,
-                       debt_to_pay = (debt - debt_paid),
-                       pct_debt_repaid = ROUND((debt_paid / debt) * 100, 2),
-                       pct_to_savings_goal = ROUND((savings_paid / savings_target_year) * 100, 2)
-                       
-                       WHERE id = 1""",
-                       (debt_paid, savings_paid))
-        
-        
-        db.commit()
-    return redirect(url_for('monthly_expenses'))
-
-
-@app.route("/financial_progress", methods = ["GET", "POST"])
-def display_progress():
-    cursor.execute("SELECT debt, debt_paid, debt_to_pay, pct_debt_repaid, savings_target_year, savings_paid, pct_to_savings_goal FROM budget_app")
-    financial_progress_rows = cursor.fetchall()
-    
-    col_names = [name[0] for name in cursor.description]    
-    financial_progress_list = []
-    
-    for row in financial_progress_rows:
-        financial_progress_dict = {}
-        for col_name, value in zip(col_names, row):
-            financial_progress_dict[col_name] = value
-        financial_progress_list.append(financial_progress_dict)
-        
-    return render_template("financial_progress.html", financial_progress = financial_progress_list)
-
-
 @app.route("/update_financial_information", methods = ["GET", "POST"])
 def update_financial_information():
     
@@ -170,6 +133,46 @@ def update_financial_information():
     
     
     return render_template("update_information.html", financial_data = financial_data_lst)
+
+
+@app.route("/savings_and_debt_repayment", methods = ["GET", "POST"])
+def savings_and_debt_repayment():
+    if request.method == "POST":
+        savings_paid = request.form.get("savings_paid")
+        debt_paid = request.form.get("debt_paid")
+        
+        cursor.execute("""
+                       UPDATE budget_app SET debt_paid = %s, savings_paid = %s,
+                       debt_to_pay = (debt - debt_paid),
+                       pct_debt_repaid = ROUND((debt_paid / debt) * 100, 2),
+                       pct_to_savings_goal = ROUND((savings_paid / savings_target_year) * 100, 2)
+                       
+                       WHERE id = 1""",
+                       (debt_paid, savings_paid))
+        
+        
+        db.commit()
+    return redirect(url_for('update_financial_information'))
+
+
+@app.route("/financial_progress", methods = ["GET", "POST"])
+def display_progress():
+    cursor.execute("SELECT debt, debt_paid, debt_to_pay, pct_debt_repaid, savings_target_year, savings_paid, pct_to_savings_goal FROM budget_app")
+    financial_progress_rows = cursor.fetchall()
+    
+    col_names = [name[0] for name in cursor.description]    
+    financial_progress_list = []
+    
+    for row in financial_progress_rows:
+        financial_progress_dict = {}
+        for col_name, value in zip(col_names, row):
+            financial_progress_dict[col_name] = value
+        financial_progress_list.append(financial_progress_dict)
+        
+    return render_template("financial_progress.html", financial_progress = financial_progress_list)
+
+
+
 
 
         
