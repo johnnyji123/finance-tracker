@@ -82,6 +82,7 @@ def monthly_expenses():
     return render_template("index.html", data = income_and_expenses_data)
 
 
+
 @app.route("/update_financial_information", methods = ["GET", "POST"])
 def update_financial_information():
     
@@ -170,7 +171,6 @@ def display_progress():
         financial_progress_list.append(financial_progress_dict)
         
     return render_template("financial_progress.html", financial_progress = financial_progress_list)
-
 
 
 
