@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request, url_for,redirect
 import mysql.connector
 import sys
 
@@ -32,6 +32,8 @@ def monthly_expenses():
         transport = request.form.get("transport")
         debt = request.form.get("debt")
         savings_target = request.form.get("savings_target_year")
+        savings_paid = request.form.get("savings_paid")
+        debt_paid = request.form.get("debt_paid")
         
 
         for data in cursor:
@@ -76,27 +78,40 @@ def monthly_expenses():
                         financial_details_dict[col_name] = value
                     income_and_expenses_data.append(financial_details_dict)  
                     
+
+                
+                
             else:
                 print("hello")
                 
         
-    print(income_and_expenses_data, file=sys.stdout)
         
     return render_template("index.html", data = income_and_expenses_data)
 
 
-    
+@app.route("/savings_and_debt_repayment", methods = ["GET", "POST"])
+def savings_and_debt_repayment():
+    if request.method == "POST":
+        savings_paid = request.form.get("savings_paid")
+        debt_paid = request.form.get("debt_paid")
+        
+        cursor.execute("UPDATE budget_app SET debt_paid = %s, savings_paid = %s WHERE id = 1",
+                       (debt_paid, savings_paid))
+        
+        
+        db.commit()
+    return redirect(url_for('monthly_expenses'))
 
 
-
-if __name__ == "__main__":
-    app.run(debug = True, use_reloader = False)
-    
-    
 #cursor.execute("DELETE FROM budget_app")
 #db.commit()
+
+if __name__ == "__main__":
+    app.run(debug = True, use_reloader = False) 
+    
     
 
+    
     
     
     
