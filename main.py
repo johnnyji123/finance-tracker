@@ -91,8 +91,8 @@ def savings_and_debt_repayment():
         cursor.execute("""
                        UPDATE budget_app SET debt_paid = %s, savings_paid = %s,
                        debt_to_pay = (debt - debt_paid),
-                       pct_debt_repaid = ROUND((debt_paid / debt) * 100),
-                       pct_to_savings_goal = ROUND((savings_paid / savings_target_year) * 100)
+                       pct_debt_repaid = ROUND((debt_paid / debt) * 100, 2),
+                       pct_to_savings_goal = ROUND((savings_paid / savings_target_year) * 100, 2)
                        
                        WHERE id = 1""",
                        (debt_paid, savings_paid))
@@ -121,41 +121,58 @@ def display_progress():
 
 @app.route("/update_financial_information", methods = ["GET", "POST"])
 def update_financial_information():
-    monthly_income = request.form.get("monthly_income")
-    rent = request.form.get("rent")
-    groceries = request.form.get("groceries")
-    entertainment = request.form.get("entertainment")
-    transport = request.form.get("transport")
     
-    cursor.execute(
-        """
-        UPDATE budget_app
-        SET monthly_income = %s,
-        rent = %s,
-        groceries = %s,
-        entertainment = %s,
-        transport = %s
-        WHERE id = 1
-        """,
-        (monthly_income, rent, groceries, entertainment, transport)
-        )
-    
-    
-    cursor.execute(
-        """UPDATE budget_app
-           SET total_expenses = (rent + groceries + entertainment + transport),
-            income_after_expenses = (monthly_income - total_expenses) 
+    financial_data_lst = []
+    if request.method == "POST":
+        monthly_income = request.form.get("monthly_income")
+        rent = request.form.get("rent")
+        groceries = request.form.get("groceries")
+        entertainment = request.form.get("entertainment")
+        transport = request.form.get("transport")
+        
+        cursor.execute(
+            """
+            UPDATE budget_app
+            SET monthly_income = %s,
+            rent = %s,
+            groceries = %s,
+            entertainment = %s,
+            transport = %s
             WHERE id = 1
+            """,
+            (monthly_income, rent, groceries, entertainment, transport)
+            )
         
-        """
         
-        )
+        cursor.execute(
+            """UPDATE budget_app
+               SET total_expenses = (rent + groceries + entertainment + transport),
+                income_after_expenses = (monthly_income - total_expenses) 
+                WHERE id = 1
+            
+            """
+            
+            )
+        
+        db.commit()
+        
+        cursor.execute("SELECT total_expenses, income_after_expenses FROM budget_app")
+        show_total_expense_and_income = cursor.fetchall()
+        
+        col_names = [name[0] for name in cursor.description]
+        
+        
+        for row in show_total_expense_and_income:
+            financial_data_dict = {}
+            for col_name, value in zip(col_names, row):
+                financial_data_dict[col_name] = value
+            financial_data_lst.append(financial_data_dict)
     
-    db.commit()
     
-    return render_template("update_information.html")
+    return render_template("update_information.html", financial_data = financial_data_lst)
 
-    
+
+        
 #cursor.execute("DELETE FROM budget_app")
 #db.commit()
 
