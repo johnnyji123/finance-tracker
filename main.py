@@ -61,7 +61,7 @@ def monthly_expenses():
                     SET total_expenses = (rent + groceries + entertainment + transport),
                     income_after_expenses = (monthly_income - total_expenses) WHERE id = 1
                     """
-                    
+                        
                     )
                 
                 
@@ -78,13 +78,6 @@ def monthly_expenses():
                         financial_details_dict[col_name] = value
                     income_and_expenses_data.append(financial_details_dict)  
                     
-
-                
-                
-            else:
-                print("hello")
-                
-        
         
     return render_template("index.html", data = income_and_expenses_data)
 
@@ -124,6 +117,44 @@ def display_progress():
         financial_progress_list.append(financial_progress_dict)
         
     return render_template("financial_progress.html", financial_progress = financial_progress_list)
+
+
+@app.route("/update_financial_information", methods = ["GET", "POST"])
+def update_financial_information():
+    monthly_income = request.form.get("monthly_income")
+    rent = request.form.get("rent")
+    groceries = request.form.get("groceries")
+    entertainment = request.form.get("entertainment")
+    transport = request.form.get("transport")
+    
+    cursor.execute(
+        """
+        UPDATE budget_app
+        SET monthly_income = %s,
+        rent = %s,
+        groceries = %s,
+        entertainment = %s,
+        transport = %s
+        WHERE id = 1
+        """,
+        (monthly_income, rent, groceries, entertainment, transport)
+        )
+    
+    
+    cursor.execute(
+        """UPDATE budget_app
+           SET total_expenses = (rent + groceries + entertainment + transport),
+            income_after_expenses = (monthly_income - total_expenses) 
+            WHERE id = 1
+        
+        """
+        
+        )
+    
+    db.commit()
+    
+    return render_template("update_information.html")
+
     
 #cursor.execute("DELETE FROM budget_app")
 #db.commit()
