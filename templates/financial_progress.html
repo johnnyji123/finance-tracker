@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>HTML 5 Boilerplate</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <h2>Progress</h2>
+    <li>
+        {% for row in financial_progress %}
+         <ul>
+             {% for key, value in row.items() %}
+                 {{key}}:{{value}}
+             {% endfor %}
+        {% endfor %}
+         
+         </ul>
+    </li>
+   
+     
+	<script src="index.js"></script>
+  </body>
+</html>

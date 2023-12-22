@@ -95,7 +95,13 @@ def savings_and_debt_repayment():
         savings_paid = request.form.get("savings_paid")
         debt_paid = request.form.get("debt_paid")
         
-        cursor.execute("UPDATE budget_app SET debt_paid = %s, savings_paid = %s WHERE id = 1",
+        cursor.execute("""
+                       UPDATE budget_app SET debt_paid = %s, savings_paid = %s,
+                       debt_to_pay = (debt - debt_paid),
+                       pct_debt_repaid = ROUND((debt_paid / debt) * 100),
+                       pct_to_savings_goal = ROUND((savings_paid / savings_target_year) * 100)
+                       
+                       WHERE id = 1""",
                        (debt_paid, savings_paid))
         
         
@@ -103,6 +109,22 @@ def savings_and_debt_repayment():
     return redirect(url_for('monthly_expenses'))
 
 
+@app.route("/financial_progress", methods = ["GET", "POST"])
+def display_progress():
+    cursor.execute("SELECT debt, debt_paid, debt_to_pay, pct_debt_repaid, savings_target_year, savings_paid, pct_to_savings_goal FROM budget_app")
+    financial_progress_rows = cursor.fetchall()
+    
+    col_names = [name[0] for name in cursor.description]    
+    financial_progress_list = []
+    
+    for row in financial_progress_rows:
+        financial_progress_dict = {}
+        for col_name, value in zip(col_names, row):
+            financial_progress_dict[col_name] = value
+        financial_progress_list.append(financial_progress_dict)
+        
+    return render_template("financial_progress.html", financial_progress = financial_progress_list)
+    
 #cursor.execute("DELETE FROM budget_app")
 #db.commit()
 
