@@ -19,68 +19,22 @@ cursor = db.cursor()
 
 app = Flask(__name__)
 
-@app.route("/", methods = ["Post", "GET"])
-def monthly_expenses():
-    income_and_expenses_data = []
-
-    if request.method == "POST":
-        cursor.execute("SELECT COUNT(*) FROM budget_app")
-        monthly_income = request.form.get("monthly_income")
-        rent = request.form.get("rent")
-        groceries = request.form.get("groceries")
-        entertainment = request.form.get("entertainment")
-        transport = request.form.get("transport")
-        debt = request.form.get("debt")
-        savings_target = request.form.get("savings_target_year")
-        savings_paid = request.form.get("savings_paid")
-        debt_paid = request.form.get("debt_paid")
-        
-
-        for data in cursor:
-            if data[0] == 0:
-                cursor.execute(
-                    """
-                    INSERT INTO budget_app
-                    (monthly_income,
-                     rent,
-                     groceries,
-                     entertainment,
-                     transport,
-                     debt,
-                     savings_target_year)
-                    
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                    """
-                    ,(monthly_income, rent, groceries, entertainment, transport, debt, savings_target)
-                    )
-                
-                
-                cursor.execute(
-                    """
-                    UPDATE budget_app
-                    SET total_expenses = (rent + groceries + entertainment + transport),
-                    income_after_expenses = (monthly_income - total_expenses) WHERE id = 1
-                    """
-                        
-                    )
-                
-                
-                db.commit()
-                
-                cursor.execute("SELECT total_expenses, income_after_expenses FROM budget_app")
-                table_row = cursor.fetchall()
-                
-                col_names = [name[0] for name in cursor.description]
-                
-                for row in table_row:
-                    financial_details_dict = {}
-                    for col_name, value in zip(col_names, row):
-                        financial_details_dict[col_name] = value
-                    income_and_expenses_data.append(financial_details_dict)  
-                    
-        
-    return render_template("index.html", data = income_and_expenses_data)
-
+def fetchall_rows(query):
+    cursor.execute(query)
+    all_rows = cursor.fetchall()
+    
+    col_names = [name[0] for name in cursor.description]
+    data_lst = []
+    
+    
+    for row in all_rows:
+        row_dict = {}
+        for col_name, value in zip(col_names, row):
+            row_dict[col_name] = value
+        data_lst.append(row_dict)
+       
+    return data_lst
+    
 
 
 @app.route("/update_financial_information", methods = ["GET", "POST"])
@@ -93,6 +47,8 @@ def update_financial_information():
         groceries = request.form.get("groceries")
         entertainment = request.form.get("entertainment")
         transport = request.form.get("transport")
+        debt = request.form.get("debt")
+        savings_target = request.form.get("savings_target_year")
         
         cursor.execute(
             """
@@ -101,10 +57,12 @@ def update_financial_information():
             rent = %s,
             groceries = %s,
             entertainment = %s,
-            transport = %s
+            transport = %s,
+            debt = %s,
+            savings_target_year = %s
             WHERE id = 1
             """,
-            (monthly_income, rent, groceries, entertainment, transport)
+            (monthly_income, rent, groceries, entertainment, transport, debt, savings_target)
             )
         
         
@@ -117,20 +75,13 @@ def update_financial_information():
             """
             
             )
-        
+            
         db.commit()
         
-        cursor.execute("SELECT total_expenses, income_after_expenses FROM budget_app")
-        show_total_expense_and_income = cursor.fetchall()
+        query = cursor.execute("SELECT total_expenses, income_after_expenses FROM budget_app")
+        financial_data_lst = fetchall_rows(query)
         
-        col_names = [name[0] for name in cursor.description]
-        
-        
-        for row in show_total_expense_and_income:
-            financial_data_dict = {}
-            for col_name, value in zip(col_names, row):
-                financial_data_dict[col_name] = value
-            financial_data_lst.append(financial_data_dict)
+
     
     
     return render_template("update_information.html", financial_data = financial_data_lst)
@@ -153,31 +104,22 @@ def savings_and_debt_repayment():
         
         
         db.commit()
+        
     return redirect(url_for('update_financial_information'))
 
 
 @app.route("/financial_progress", methods = ["GET", "POST"])
 def display_progress():
-    cursor.execute("SELECT debt, debt_paid, debt_to_pay, pct_debt_repaid, savings_target_year, savings_paid, pct_to_savings_goal FROM budget_app")
-    financial_progress_rows = cursor.fetchall()
+    query = cursor.execute("SELECT debt, debt_paid, debt_to_pay, pct_debt_repaid, savings_target_year, savings_paid, pct_to_savings_goal FROM budget_app")
+    financial_progress_lst = fetchall_rows(query)
     
-    col_names = [name[0] for name in cursor.description]    
-    financial_progress_list = []
-    
-    for row in financial_progress_rows:
-        financial_progress_dict = {}
-        for col_name, value in zip(col_names, row):
-            financial_progress_dict[col_name] = value
-        financial_progress_list.append(financial_progress_dict)
-        
-    return render_template("financial_progress.html", financial_progress = financial_progress_list)
+     
+    return render_template("financial_progress.html", financial_progress = financial_progress_lst)
 
 
 
 
-        
-#cursor.execute("DELETE FROM budget_app")
-#db.commit()
+
 
 if __name__ == "__main__":
     app.run(debug = True, use_reloader = False) 
@@ -188,6 +130,4 @@ if __name__ == "__main__":
     
     
     
-    
         
-    #app.run(debug = True, use_reloader = False)
