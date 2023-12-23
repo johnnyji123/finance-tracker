@@ -7,7 +7,7 @@ import sys
 db = mysql.connector.connect(
         host = "localhost",
         user = "root",
-        password = "projects123123",
+        password = "password",
         database = "finance_tracker"
     )
 
